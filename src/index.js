@@ -14,6 +14,7 @@ import reducers from './reducers';
 import { newMessage, newView, typingStart, typingEnd } from './actions';
 
 injectTapEventPlugin();
+require('dotenv').config()
 
 const middleware = [thunkMiddleware, api];
 
@@ -168,7 +169,7 @@ const store = createStore(
   composeWithDevTools(applyMiddleware(...middleware)),
 );
 
-const socket = io.connect('http://localhost:3001');
+const socket = io.connect(process.env.SOCKET_URL);
 
 socket.on('new message', (data) => {
   console.log('message_data: ', data);
