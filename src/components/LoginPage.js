@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
 import { Link, withRouter } from 'react-router-dom';
+import { authorization } from '../actions';
 
 const container = {
   height: '66vh',
@@ -36,10 +37,14 @@ class LoginPage extends Component {
     };
   }
   componentDidMount() {
-
+    document.title = 'Login';
+    const { authorization, isLoggedIn, users } = this.props;
+    if (localStorage.getItem('uuid') && !isLoggedIn && !users.isLoading)
+    authorization(localStorage.getItem('uuid'));
   }
   render() {
     const { logIn, error, isLoading, isLoggedIn, socket } = this.props;
+    console.log('kkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkkk');
     if(isLoggedIn) {
       this.props.history.push('/messages');
     }

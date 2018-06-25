@@ -2,7 +2,7 @@ import React, { Component } from 'react';
 import { Link } from 'react-router-dom';
 import Avatar from 'material-ui/Avatar';
 import RaisedButton from 'material-ui/RaisedButton';
-import { createDialog, fetchUsers, fetchRandomUsers } from '../actions';
+import { createDialog, fetchSocial, fetchRandomUsers } from '../actions';
 
 class DialogOK extends Component {
   constructor(props) {
@@ -64,7 +64,7 @@ class RenderCreateDialog extends Component {
       this.props.dispatch(fetchRandomUsers(10, this.props.thisUser.id));
     }
     else
-      this.props.dispatch(fetchUsers(this.props.thisUser.friends));
+      this.props.dispatch(fetchSocial(this.props.thisUser.id));
   }
   render() {
     const { setMenuLink, thisUser, users, dispatch } = this.props;
@@ -82,7 +82,7 @@ class RenderCreateDialog extends Component {
             <span>
               <div style={{ textAlign: 'center', fontWeight: 'bold', margin: 5 }}>Participants</div>
               {participants.length !== 0 ? participants.map(u => (
-                <span className="participant" key={u.id}>
+                <span className="participant" key={`createDialog.RightMenu.User${u.id}`}>
                   <span>{`${u.firstname} ${u.lastname}`}</span>
                   <span
                     className="participant_delete"
@@ -110,9 +110,9 @@ class RenderCreateDialog extends Component {
             </div>
           </div>
         </div>
-        {users.list.filter(u => u.id !== thisUser.id).map((user) => (
+        {users.list.filter(u => u.id !== thisUser.id).map((user, index) => (
             <div
-              key={user.id}
+              key={`createDialog.User${user.id}${index}`}
               className="create_dialog_user"
               onClick={() => {
                 if (this.state.participants.indexOf(user.id) === -1) {

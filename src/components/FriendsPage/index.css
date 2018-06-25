@@ -1,0 +1,25 @@
+ a .name:hover {
+    text-decoration: underline;
+}
+
+.user_card {
+    position: relative;
+    top: 0px;
+    left: 0px;
+    padding: 10px;
+    z-index: 60;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    border-bottom: 1px solid #dadada;
+}
+
+.button {
+    opacity: 0;
+    transition: 0.1s;
+}
+
+.user_card:hover .button {
+    opacity: 1;
+    transition: 0.1s;
+}

@@ -2,44 +2,44 @@ import React, { Component } from 'react';
 import { Link, withRouter } from 'react-router-dom';
 import Avatar from 'material-ui/Avatar';
 import RenderCreateDialog from './RenderCreateDialog';
-import { fetchDialogs, fetchUsers, removeDialog } from '../actions';
+import { fetchDialogs, removeDialog } from '../actions';
 
 class RenderDialogs extends Component {
   constructor(props) {
     super(props);
-    this.state = {};
+    this.state = {
+      searchValue: '',
+    };
+    this.unread = this.unread.bind(this);
   }
-  componentWillMount() {
+  unread(dialogs) {
+    const { user } = this.props;
+    return dialogs.filter(d => d.messages.some(m => !m.viewedBy.some(vb => vb === user.id)));
+  }
+  componentDidMount() {
     const { dispatch, dialogs, user } = this.props;
+
+    document.title = 'Messages';
+
     console.log('fetchingDialogs: ', dialogs);
     console.log('fetchingUser: ', user);
-    dispatch(fetchDialogs(dialogs, user));
+    dispatch(fetchDialogs(user, dialogs.list.length, 10));
   }
   render() {
     const { dialogs, user, users, setMenuLink, type, dispatch, history } = this.props;
-    console.log('dialogs1: ', dialogs);
-    console.log('type: ', type);
-
-    let usersToFetch = [];
-    dialogs.list.map(d =>
-        d.participants.map(p => {
-          if (p !== user.id && !usersToFetch.some(utf => utf  === p))
-            usersToFetch.push(p);
-        })
-          .concat(d.messages.map(m => {
-            if (m.author !== user.id && !usersToFetch.some(utf => utf  === m.author))
-              usersToFetch.push(m.author);
-          }))
-
+    const filteredDialogs = dialogs.list
+      .filter(d =>
+      (d.name.toLowerCase().indexOf(this.state.searchValue.toLowerCase()) !== -1 ||
+      !!users.list.filter(u =>
+        d.participants.some(p => p === u.id))
+        .some(u => u.firstname.toLowerCase().indexOf(this.state.searchValue.toLowerCase()) !== -1) ||
+      !!users.list.filter(u =>
+        d.participants.some(p => p === u.id))
+        .some(u => u.lastname.toLowerCase().indexOf(this.state.searchValue.toLowerCase()) !== -1))
     );
-    usersToFetch = usersToFetch.filter(utf => !users.list.some(u => utf === u.id));
-    if (usersToFetch.length !== 0 && !users.isLoading) {
-      console.log('usersToFetch: ', usersToFetch);
-      dispatch(fetchUsers(usersToFetch));
-      return null;
-    }
+    console.log('dialogs1: ', dialogs);
 
-    if (type === 1)
+    if (type === 1 || type === 2)
     return (
     <div className="content" style={{
         marginTop: 110,
@@ -49,22 +49,39 @@ class RenderDialogs extends Component {
         <div className="dialogs_top_bar_content">
           <div className="dialogs_search">
             <span><i className="fa fa-search"></i></span>
-            <input type="text" placeholder="Search" className="dialogs_search_input"/>
+            <input
+              type="text"
+              placeholder="Search"
+              className="dialogs_search_input"
+              ref={(node) => { this.searchInput = node; }}
+              value={this.state.searchValue}
+              onChange={(e) => { this.setState({ searchValue: e.target.value }); }}
+              />
           </div>
-          <div className="dialogs_add" onClick={() => {
-              setMenuLink(3);
+            <div className="dialogs_add" onClick={() => {
+              this.searchInput.focus();
+              if (this.state.searchValue.length === 0) {
+                setMenuLink(3);
+              } else {
+                this.setState({ searchValue: '' });
+              }
             }}>
-            <i className="fa fa-plus"></i>
-          </div>
+              {this.state.searchValue.length === 0 ?
+                <i className="fa fa-plus"  style={{ transform: 'rotate(0deg)', transition: '0.3s' }}></i>
+                : <i className="fa fa-plus" style={{ transform: 'rotate(45deg)', transition: '0.3s' }}></i>
+              }
+            </div>
         </div>
       </div>
-      {dialogs.list.length !== 0 ? dialogs.list.map((dialog) => (
+      {dialogs.list.length !== 0 ? (type === 1 ? filteredDialogs : this.unread(filteredDialogs))
+        .map((dialog) => (
           <div
             className="dialog"
             key={dialog.id}
             style={{
               borderBottom: dialogs.list.indexOf(dialog) === dialogs.list.length - 1 ? 'none' : '1px dashed #dadada',
               padding: 0,
+              backgroundColor: this.unread(dialogs.list).indexOf(dialog) !== -1 ? '#c6c6c6' : 'white',
             }}
           >
             <div
@@ -81,7 +98,7 @@ class RenderDialogs extends Component {
             }</Avatar>
               <span className="dialog_name">
                 {dialog.name ? dialog.name :
-                  dialog.participants.filter(id => id !== user.id)
+                  dialog.participants.filter(id => id !== user.id && !dialog.usersWhoLeft.some(u => u === id))
                     .map(id =>
                       users.list.find(u => u.id === id) ?
                         `${users.list.find(u => u.id === id).firstname} ${users.list.find(u => u.id === id).lastname}`
@@ -114,10 +131,24 @@ class RenderDialogs extends Component {
           </div>
         </div>
       }
+      {type === 2 && this.unread(filteredDialogs).length === 0 ?
+        <div className="no_dialogs">
+          <div style={{ textAlign: 'center' }}>
+            <div>{`You have no unread messages ${this.state.searchValue ? `filtered by '${this.state.searchValue}'` : ' '}`}</div>
+          </div>
+        </div>
+        : null
+      }
+      {type === 1 && dialogs.list.length !== 0 && filteredDialogs.length === 0 ?
+        <div className="no_dialogs">
+          <div style={{ textAlign: 'center' }}>
+            <div>{`You have no dialogs ${this.state.searchValue ? `filtered by '${this.state.searchValue}'` : ' '}`}</div>
+          </div>
+        </div>
+        : null
+      }
     </div>
   );
-    if (type === 2)
-    return null;
     if (type === 3)
     return (
       <RenderCreateDialog

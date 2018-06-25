@@ -6,7 +6,16 @@ const request = (requestOptions, actionName, endpoint) => ({
   },
 });
 
-export const logIn = (username, password) => dispatch => {
+export const authorization = session => dispatch =>
+  dispatch(request({
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      session,
+    }),
+  }, 'LOG_IN', 'authorization'));
+
+export const logIn = (username, password) => dispatch =>
   dispatch(request({
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -15,9 +24,8 @@ export const logIn = (username, password) => dispatch => {
       password,
     }),
   }, 'LOG_IN', 'login'));
-};
 
-export const signUp = (username, firstname, lastname, password) => dispatch => {
+export const signUp = (username, firstname, lastname, password) => dispatch =>
   dispatch(request({
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -28,24 +36,22 @@ export const signUp = (username, firstname, lastname, password) => dispatch => {
       password,
     }),
   }, 'SIGN_UP', 'signup'));
-};
 
-export const fetchDialogs = (dialogs, user) => dispatch => {
-  if (user.dialogs.filter(ud => !dialogs.list.some(d => d.id === ud)).lendth !== 0  )
+export const fetchDialogs = (user, offset, limit) => dispatch =>
   dispatch(request({
-    method: 'POST',
+    method: 'GET',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      query: user.dialogs.filter(ud => !dialogs.list.some(d => d.id === ud)),
       userID: user.id,
       password: user.password,
+      limit,
+      offset,
     }),
   }, 'FETCH_DIALOGS', 'dialogs'));
-};
 
-export const fetchMessages = (user, dialogID, offset, limit) => dispatch => {
+export const fetchMessages = (user, dialogID, offset, limit) => dispatch =>
   dispatch(request({
-    method: 'POST',
+    method: 'GET',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       userID: user.id,
@@ -55,30 +61,36 @@ export const fetchMessages = (user, dialogID, offset, limit) => dispatch => {
       offset,
     }),
   }, 'FETCH_MESSAGES', 'messages'));
-};
 
-export const fetchUsers = (query) => dispatch => {
+export const fetchSocial = id => dispatch =>
   dispatch(request({
-    method: 'POST',
+    method: 'GET',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
-      query,
+      id,
+    }),
+  }, 'FETCH_SOCIAL', 'subscribes'));
+
+export const fetchUser = id => dispatch =>
+  dispatch(request({
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      id,
     }),
   }, 'FETCH_USERS', 'users'));
-};
 
-export const fetchRandomUsers = (amount, besides) => dispatch => {
+export const fetchRandomUsers = (amount, besides) => dispatch =>
   dispatch(request({
-    method: 'POST',
+    method: 'GET',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
       amount,
       besides,
     }),
   }, 'FETCH_USERS', 'users/random'));
-};
 
-export const createDialog = (user, participants, name) => dispatch => {
+export const createDialog = (user, participants, name) => dispatch =>
   dispatch(request({
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
@@ -88,10 +100,9 @@ export const createDialog = (user, participants, name) => dispatch => {
       userID: user.id,
       password: user.password,
     }),
-  }, 'CREATE_DIALOG', 'dialogs/create'));
-};
+  }, 'CREATE_DIALOG', 'dialogs'));
 
-export const removeDialog = (user, dialogID) => dispatch => {
+export const removeDialog = (user, dialogID) => dispatch =>
   dispatch(request({
     method: 'DELETE',
     headers: { 'Content-Type': 'application/json' },
@@ -100,44 +111,105 @@ export const removeDialog = (user, dialogID) => dispatch => {
       userID: user.id,
       password: user.password,
     }),
-  }, 'REMOVE_DIALOG', 'dialogs/remove'));
-};
+  }, 'REMOVE_DIALOG', 'dialogs'));
+
+export const fetchPostsOf = (author, limit, offset) => dispatch =>
+  dispatch(request({
+    method: 'GET',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      author,
+      limit,
+      offset,
+    }),
+  }, 'FETCH_POSTS', 'posts'));
+
+export const addPost = (userID, session, text) => dispatch =>
+  dispatch(request({
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      userID,
+      session,
+      text,
+    }),
+  }, 'ADD_POST', 'posts'));
+
+export const subscribe = (id, userID, session) => dispatch =>
+  dispatch(request({
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      id,
+      userID,
+      session,
+    }),
+  }, 'SUBSCRIBE', 'subscribes'));
+
+export const unsubscribe = (id, userID, session) => dispatch =>
+  dispatch(request({
+    method: 'DELETE',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      id,
+      userID,
+      session,
+    }),
+  }, 'UNSUBSCRIBE', 'subscribes'));
+
+export const changeStatus = (status, userID, session) => dispatch =>
+  dispatch(request({
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      status,
+      userID,
+      session,
+    }),
+  }, 'CHANGE_STATUS', 'status'));
+
+export const changePersonal = (data, userID, session) => dispatch =>
+  dispatch(request({
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      data,
+      userID,
+      session,
+    }),
+  }, 'CHANGE_PERSONAL', 'changepersonal'));
 
 
-
-
-
-
-
-
-
-
-
-export const typingStart = (data) => ({
+export const typingStart = data => ({
   type: 'TYPING_START',
   userID: data.userID,
   dialogID: data.dialogID,
 });
 
-export const typingEnd = (data) => ({
+export const typingEnd = data => ({
   type: 'TYPING_END',
   userID: data.userID,
   dialogID: data.dialogID,
 });
 
-export const newMessage = (data) => ({
+export const newMessage = data => ({
   type: 'NEW_MESSAGE',
   dialogID: data.dialogID,
   message: data.message,
 });
 
-export const newView = (data) => ({
+export const newView = data => ({
   type: 'NEW_VIEW',
   userID: data.userID,
   dialogID: data.dialogID,
   messageID: data.messageID,
 });
 
-export const newRedirectNull = () => ({
-  type: 'NEW_REDIRECT_NULL'
+export const newRedirect = id => ({
+  type: 'NEW_REDIRECT',
+  id,
+});
+
+export const logOut = () => ({
+  type: 'LOG_OUT',
 });

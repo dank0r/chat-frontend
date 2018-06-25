@@ -29,7 +29,7 @@ body {
 }
 
 a {
-    color: #337ab7;
+    color: #337ab7 !important;
     text-decoration: none;
 }
 
@@ -614,6 +614,7 @@ a:focus {
 }
 
 .error {
+    text-align: center;
     color: white;
     font-weight: bold;
     background-color: #ff6c62;
@@ -632,6 +633,16 @@ a:focus {
     background-color: #edeef0;
 }
 
+.clickable-icon {
+    margin: 5px;
+    text-decoration: underline;
+    cursor: pointer;
+}
+
+.clickable-icon:hover {
+    text-decoration: none;
+    color: grey;
+}
 
 
 

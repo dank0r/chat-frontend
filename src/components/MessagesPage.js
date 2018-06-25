@@ -9,6 +9,9 @@ class MessagesPage extends Component {
     super(props);
     this.state = {};
   }
+  componentWillUnmount() {
+    this.props.setMenuLink(1);
+  }
   render() {
     const { dialogID, type, dialogs, user, users, setMenuLink, dispatch, socket } = this.props;
     return (
