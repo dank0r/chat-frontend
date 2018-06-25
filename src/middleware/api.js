@@ -23,7 +23,7 @@ const callApi = async (endpoint, requestOptions) => {
   }
   console.log('query: ', query);
   try {
-    const response = await fetch(`http://localhost:3012/${endpoint + (query || '')}`, options);
+    const response = await fetch(`http://newmsg.herokuapp.com/${endpoint + (query || '')}`, options);
     if (response.ok) {
       return response.json();
     }
